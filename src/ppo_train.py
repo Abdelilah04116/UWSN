@@ -160,7 +160,7 @@ class UWSNTrainer:
         self.model.learn(
             total_timesteps=total_timesteps,
             callback=eval_callback,
-            progress_bar=True
+            progress_bar=False
         )
         
         # Sauvegarde du modèle final
@@ -437,7 +437,7 @@ def main():
     num_nodes = 15
     area_size = 1000.0
     depth_range = (-100, -10)
-    total_timesteps = 200000
+    total_timesteps = 20000
     
     # Création du trainer
     trainer = UWSNTrainer(
@@ -453,7 +453,7 @@ def main():
     # Évaluation
     print("\n" + "=" * 60)
     print("🔍 Évaluation du modèle entraîné")
-    metrics = trainer.evaluate(num_episodes=100)
+    metrics = trainer.evaluate(num_episodes=50)
     
     # Comparaison avec les baselines
     print("\n" + "=" * 60)

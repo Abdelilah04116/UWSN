@@ -11,6 +11,7 @@ sys.path.append('src')
 from src.ppo_train import UWSNTrainer
 import time
 
+
 def main():
     """Entraînement rapide pour test"""
     
@@ -22,10 +23,10 @@ def main():
         'num_nodes': 8,           # Petit réseau
         'area_size': 500.0,       # Zone réduite
         'depth_range': (-50, -10), # Profondeur réduite
-        'total_timesteps': 10000, # Entraînement court
+        'total_timesteps': 20000, # Entraînement court CPU
         'learning_rate': 3e-4,
         'n_steps': 512,           # Moins de pas par mise à jour
-        'batch_size': 32,         # Batch plus petit
+        'batch_size': 64,         # Batch un peu plus grand
         'n_epochs': 5             # Moins d'époques
     }
     
@@ -55,8 +56,8 @@ def main():
             n_steps=config['n_steps'],
             batch_size=config['batch_size'],
             n_epochs=config['n_epochs'],
-            eval_freq=2000,
-            save_freq=5000
+            eval_freq=10**9,  # désactive l'évaluation pendant le quick run
+            save_freq=10**9   # pas de sauvegardes intermédiaires
         )
         
         training_time = time.time() - start_time
@@ -80,46 +81,14 @@ def main():
     except Exception as e:
         print(f"⚠️ Erreur lors de l'évaluation: {e}")
     
-    # Test de prédiction
-    print("\n🎯 Test de prédiction...")
-    try:
-        # Créer un environnement de test
-        test_env = trainer.create_environment()
-        
-        # Test sur quelques épisodes
-        for episode in range(3):
-            obs = test_env.reset()
-            done = False
-            step = 0
-            total_reward = 0
-            
-            print(f"   Épisode {episode + 1}:")
-            print(f"     Source: {test_env.source}, Destination: {test_env.destination}")
-            
-            while not done and step < 20:
-                action, _ = model.predict(obs, deterministic=True)
-                obs, reward, done, info = test_env.step(action)
-                total_reward += reward
-                step += 1
-                
-                if step <= 5:  # Afficher les 5 premières étapes
-                    print(f"       Étape {step}: Action {action}, Récompense {reward:.2f}")
-            
-            print(f"     Résultat: {'Succès' if done and action == test_env.destination else 'Échec'}")
-            print(f"     Récompense totale: {total_reward:.2f}")
-            print(f"     Chemin: {info.get('episode_stats', {}).get('path', [])}")
-            print()
-        
-    except Exception as e:
-        print(f"⚠️ Erreur lors du test: {e}")
-    
     print("🎉 Test d'entraînement terminé!")
     print("\n📝 Prochaines étapes:")
-    print("   1. Entraînement complet: python src/ppo_train.py")
+    print("   1. Entraînement complet: python -m src.ppo_train")
     print("   2. Interface Streamlit: streamlit run app/streamlit_app.py")
     print("   3. Notebook Colab: notebooks/uwsn_ppo_colab.ipynb")
     
     return True
+
 
 if __name__ == "__main__":
     success = main()

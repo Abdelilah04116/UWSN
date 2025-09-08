@@ -503,21 +503,46 @@ def main():
             
             if st.button("🚀 Lancer la prédiction PPO"):
                 with st.spinner("Calcul du chemin optimal..."):
+                    # Harmoniser le nombre de nœuds avec le modèle chargé
+                    expected_dim = getattr(getattr(model, 'observation_space', None), 'shape', [None])[0]
+                    current_nodes = len(nodes)
+                    if expected_dim is not None:
+                        try:
+                            expected_nodes = int((int(expected_dim) - 4) // 7)
+                        except Exception:
+                            expected_nodes = current_nodes
+                    else:
+                        expected_nodes = current_nodes
+
+                    if expected_nodes > 0 and expected_nodes != current_nodes:
+                        st.info(f"Le modèle attend {expected_nodes} nœuds, régénération du réseau pour correspondre.")
+                        nodes = create_sample_network(
+                            num_nodes=expected_nodes,
+                            area_size=area_size,
+                            depth_range=(depth_min, depth_max)
+                        )
+                        # Ajuster source/destination
+                        source_local = min(source, expected_nodes - 1)
+                        destination_local = min(destination, expected_nodes - 1)
+                    else:
+                        source_local = source
+                        destination_local = destination
+
                     # Création de l'environnement
                     env = UWSNRoutingEnv(nodes=nodes, max_steps=50)
-                    env.source = source
-                    env.destination = destination
+                    env.source = source_local
+                    env.destination = destination_local
                     env.data_size = data_size
                     
-                    # Simulation avec le modèle PPO
-                    obs = env.reset()
-                    done = False
-                    path = [source]
+                    # Simulation avec le modèle PPO (API Gymnasium)
+                    obs, _ = env.reset()
+                    terminated, truncated = False, False
+                    path = [env.source]
                     step_count = 0
                     
-                    while not done and step_count < 50:
+                    while not (terminated or truncated) and step_count < 50:
                         action, _ = model.predict(obs, deterministic=True)
-                        obs, reward, done, info = env.step(action)
+                        obs, reward, terminated, truncated, info = env.step(action)
                         path.append(action)
                         step_count += 1
                     
