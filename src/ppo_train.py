@@ -122,6 +122,9 @@ class UWSNTrainer:
             activation_fn=torch.nn.ReLU
         )
         
+        # Sélection du device (GPU si dispo)
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        
         # Création du modèle PPO
         self.model = PPO(
             "MlpPolicy",
@@ -137,6 +140,7 @@ class UWSNTrainer:
             vf_coef=vf_coef,
             max_grad_norm=max_grad_norm,
             policy_kwargs=policy_kwargs,
+            device=device,
             verbose=1,
             tensorboard_log="./tensorboard_logs/"
         )
@@ -193,14 +197,14 @@ class UWSNTrainer:
         paths = []
         
         for episode in range(num_episodes):
-            obs = eval_env.reset()
-            done = False
-            episode_reward = 0
+            obs, _ = eval_env.reset()
+            terminated, truncated = False, False
+            episode_reward = 0.0
             step_count = 0
             
-            while not done:
+            while not (terminated or truncated):
                 action, _ = self.model.predict(obs, deterministic=True)
-                obs, reward, done, info = eval_env.step(action)
+                obs, reward, terminated, truncated, info = eval_env.step(action)
                 episode_reward += reward
                 step_count += 1
                 
@@ -286,11 +290,10 @@ class UWSNTrainer:
         energy_consumptions = []
         
         for episode in range(num_episodes):
-            obs = env.reset()
-            source = env.source
+            obs, _ = env.reset()
             destination = env.destination
             
-            # Calcul du chemin optimal
+            # Chemin optimal
             optimal_path = env.get_optimal_path()
             
             if len(optimal_path) < 2:
@@ -299,23 +302,18 @@ class UWSNTrainer:
                 energy_consumptions.append(float('inf'))
                 continue
             
-            # Simulation du chemin optimal
-            total_reward = 0
+            total_reward = 0.0
+            info = {}
             for i in range(len(optimal_path) - 1):
                 action = optimal_path[i + 1]
-                obs, reward, done, info = env.step(action)
+                obs, reward, terminated, truncated, info = env.step(action)
                 total_reward += reward
-                
-                if done:
+                if terminated or truncated:
                     break
             
             episode_rewards.append(total_reward)
-            success_rates.append(1.0 if action == destination else 0.0)
-            
-            if 'episode_stats' in info:
-                energy_consumptions.append(info['episode_stats']['total_energy'])
-            else:
-                energy_consumptions.append(0.0)
+            success_rates.append(1.0 if env.state.current_node == destination else 0.0)
+            energy_consumptions.append(info.get('episode_stats', {}).get('total_energy', 0.0))
         
         return {
             'mean_reward': np.mean(episode_rewards),
@@ -332,30 +330,24 @@ class UWSNTrainer:
         energy_consumptions = []
         
         for episode in range(num_episodes):
-            obs = env.reset()
-            done = False
-            total_reward = 0
+            obs, _ = env.reset()
+            terminated, truncated = False, False
+            total_reward = 0.0
             step_count = 0
             max_steps = 50
             
-            while not done and step_count < max_steps:
-                # Action aléatoire parmi les nœuds vivants
+            while not (terminated or truncated) and step_count < max_steps:
                 valid_actions = [i for i in range(env.num_nodes) if env.nodes[i].is_alive()]
                 if not valid_actions:
                     break
-                
                 action = np.random.choice(valid_actions)
-                obs, reward, done, info = env.step(action)
+                obs, reward, terminated, truncated, info = env.step(action)
                 total_reward += reward
                 step_count += 1
             
             episode_rewards.append(total_reward)
-            success_rates.append(1.0 if done and action == env.destination else 0.0)
-            
-            if 'episode_stats' in info:
-                energy_consumptions.append(info['episode_stats']['total_energy'])
-            else:
-                energy_consumptions.append(0.0)
+            success_rates.append(1.0 if env.state.current_node == env.destination else 0.0)
+            energy_consumptions.append(info.get('episode_stats', {}).get('total_energy', 0.0))
         
         return {
             'mean_reward': np.mean(episode_rewards),

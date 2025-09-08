@@ -5,8 +5,8 @@ Environnement Gym personnalisé pour l'optimisation de routage
 dans les réseaux de capteurs sous-marins (UWSN)
 """
 
-import gym
-from gym import spaces
+import gymnasium as gym
+from gymnasium import spaces
 import numpy as np
 from typing import List, Tuple, Dict, Optional, Any
 import random
