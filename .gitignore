@@ -1,0 +1,92 @@
+# Python bytecode/cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.env/
+.venv/
+venv/
+env/
+ENV/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors/IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build outputs
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Testing/coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# MyPy / Pyright
+.mypy_cache/
+.pytype/
+.pyright/
+
+# Logs and artifacts
+logs/
+*.log
+
+tensorboard_logs/
+
+# Streamlit cache
+.streamlit/
+
+# Node (if ever used)
+node_modules/
+
+# Models and large artifacts
+models/*.zip
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*.pb
+
+# Keep documentation in models
+!models/README.md
+
+# Data dumps
+*.csv
+*.tsv
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.npz
+*.npy
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+
+# Local configs/secrets
+*.env
+*.env.*
+**/secrets.*
+
+# Misc
+.cache/
+coverage.xml
+
+# Streamlit temporary
+**/.streamlit/
+
+# VS Code Python settings cache
+.pyre/

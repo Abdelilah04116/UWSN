@@ -1,0 +1,23 @@
+### Fichier: environment.yml
+
+name: uwsn-ppo
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - numpy
+  - matplotlib
+  - pandas
+  - scipy
+  - seaborn
+  - jupyter
+  - ipywidgets
+  - pip:
+    - gym==0.21.0
+    - stable-baselines3==2.0.0
+    - torch==2.0.1
+    - plotly==5.15.0
+    - streamlit==1.25.0
+    - tqdm==4.65.0
