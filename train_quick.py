@@ -20,14 +20,14 @@ def main():
     
     # Configuration minimale pour test rapide
     config = {
-        'num_nodes': 15,           # Petit réseau
-        'area_size': 500.0,       # Zone réduite
-        'depth_range': (-50, -10), # Profondeur réduite
-        'total_timesteps': 20000, # Entraînement court CPU
+        'num_nodes': 15,           # Taille de réseau réaliste
+        'area_size': 800.0,       # Zone un peu plus grande
+        'depth_range': (-100, -20), # Plage de profondeur
+        'total_timesteps': 100000, # Entraînement plus long pour meilleure perf
         'learning_rate': 3e-4,
-        'n_steps': 512,           # Moins de pas par mise à jour
-        'batch_size': 64,         # Batch un peu plus grand
-        'n_epochs': 5             # Moins d'époques
+        'n_steps': 2048,          # Plus de pas par update (meilleure utilisation GPU)
+        'batch_size': 512,        # Batch conséquent pour stabilité
+        'n_epochs': 10            # Davantage d'époques par update
     }
     
     print(f"📊 Configuration:")
@@ -56,12 +56,26 @@ def main():
             n_steps=config['n_steps'],
             batch_size=config['batch_size'],
             n_epochs=config['n_epochs'],
-            eval_freq=10**9,  # désactive l'évaluation pendant le quick run
-            save_freq=10**9   # pas de sauvegardes intermédiaires
+            eval_freq=5000,  # évalue et log périodiquement
+            save_freq=20000  # checkpoints périodiques
         )
         
         training_time = time.time() - start_time
         print(f"✅ Entraînement terminé en {training_time:.1f}s")
+        
+        # Export du meilleur modèle (évalué) sous un nom pratique
+        best_dir = "models/ppo_uwsn_quick_best"
+        best_ckpt = os.path.join(best_dir, "best_model.zip")
+        export_path = "models/ppo_uwsn_quick_best.zip"
+        try:
+            if os.path.exists(best_ckpt):
+                import shutil
+                shutil.copyfile(best_ckpt, export_path)
+                print(f"💾 Meilleur modèle copié vers: {export_path}")
+            else:
+                print("ℹ️ Aucun best_model.zip trouvé (évaluation trop rare ou non atteinte).")
+        except Exception as e:
+            print(f"⚠️ Impossible de copier le meilleur modèle: {e}")
         
     except Exception as e:
         print(f"❌ Erreur lors de l'entraînement: {e}")

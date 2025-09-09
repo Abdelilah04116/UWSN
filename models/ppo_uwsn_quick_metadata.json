@@ -5,7 +5,7 @@
     -50,
     -10
   ],
-  "training_date": "2025-09-09T11:23:10.494582",
+  "training_date": "2025-09-09T11:59:08.532078",
   "model_path": "models/ppo_uwsn_quick",
   "nodes_info": [
     {

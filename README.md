@@ -379,9 +379,8 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 ## 📞 Contact
 
-- **Auteur** : Votre Nom
-- **Email** : votre.email@example.com
-- **GitHub** : [@votre-username](https://github.com/votre-username)
+- **Auteur** : Abdelilah ourti
+- **Email** : abdelilahourti@gmail.com
 
 ---
 

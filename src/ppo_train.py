@@ -166,6 +166,19 @@ class UWSNTrainer:
         # Sauvegarde du modèle final
         self.model.save(self.model_save_path)
         print(f"💾 Modèle sauvegardé: {self.model_save_path}")
+
+        # Export convivial du meilleur modèle évalué si disponible
+        try:
+            import shutil, os
+            best_ckpt = os.path.join(f"{self.model_save_path}_best", "best_model.zip")
+            export_best = f"{self.model_save_path}_best.zip"
+            if os.path.exists(best_ckpt):
+                shutil.copyfile(best_ckpt, export_best)
+                print(f"🏅 Meilleur modèle exporté vers: {export_best}")
+            else:
+                print("ℹ️ Aucun best_model.zip détecté (évaluation pas encore produite).")
+        except Exception as e:
+            print(f"⚠️ Export du meilleur modèle échoué: {e}")
         
         # Sauvegarde des métadonnées
         self._save_metadata()
