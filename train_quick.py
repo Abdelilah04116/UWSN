@@ -20,7 +20,7 @@ def main():
     
     # Configuration minimale pour test rapide
     config = {
-        'num_nodes': 8,           # Petit réseau
+        'num_nodes': 15,           # Petit réseau
         'area_size': 500.0,       # Zone réduite
         'depth_range': (-50, -10), # Profondeur réduite
         'total_timesteps': 20000, # Entraînement court CPU

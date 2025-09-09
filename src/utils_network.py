@@ -112,6 +112,8 @@ class AcousticPropagation:
         - d: distance (m)
         - α: coefficient d'absorption (dB/km)
         """
+        # Sécurisation pour éviter log10(0) ou négatif
+        distance = max(1.0, abs(distance))
         # Perte de trajet géométrique (dB)
         geometric_loss = 20 * math.log10(distance)
         

@@ -472,7 +472,7 @@ def main():
         
         with col2:
             st.subheader("Vue 2D (dessus)")
-            fig_2d = create_network_visualization(nodes, source=source, destination=destination)
+            fig_2d = create_2d_visualization(nodes, source=source, destination=destination)
             st.plotly_chart(fig_2d, use_container_width=True)
         
         # Informations sur les nœuds
@@ -528,24 +528,26 @@ def main():
                         source_local = source
                         destination_local = destination
 
-                    # Création de l'environnement
-                    env = UWSNRoutingEnv(nodes=nodes, max_steps=50)
-                    env.source = source_local
-                    env.destination = destination_local
-                    env.data_size = data_size
-                    
-                    # Simulation avec le modèle PPO (API Gymnasium)
-                    obs, _ = env.reset()
+                    # Correction : Création de l'environnement avec data_size fixé
+                    env = UWSNRoutingEnv(nodes=nodes, max_steps=50, data_size_range=(data_size, data_size))
+
+                    # Reset avec options pour fixer source/destination/data_size
+                    obs, _ = env.reset(options={
+                        'source': int(source_local),
+                        'destination': int(destination_local),
+                        'data_size': int(data_size)
+                    })
+
                     terminated, truncated = False, False
                     path = [env.source]
                     step_count = 0
-                    
+
                     while not (terminated or truncated) and step_count < 50:
                         action, _ = model.predict(obs, deterministic=True)
                         obs, reward, terminated, truncated, info = env.step(action)
                         path.append(action)
                         step_count += 1
-                    
+
                     st.session_state.ppo_path = path
                     st.session_state.ppo_metrics = calculate_network_metrics_detailed(nodes, path, data_size)
             
@@ -568,7 +570,7 @@ def main():
                     st.plotly_chart(fig_3d_path, use_container_width=True)
                 
                 with col2:
-                    fig_2d_path = create_network_visualization(
+                    fig_2d_path = create_2d_visualization(
                         nodes, path=st.session_state.ppo_path,
                         source=source, destination=destination
                     )

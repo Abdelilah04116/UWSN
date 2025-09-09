@@ -106,16 +106,34 @@ class UWSNRoutingEnv(gym.Env):
             np.random.seed(seed)
             random.seed(seed)
         
-        # Sélection aléatoire de source et destination
-        self.source = random.randint(0, self.num_nodes - 1)
-        self.destination = random.randint(0, self.num_nodes - 1)
+        # Récupération d'options éventuelles (source/destination/data_size)
+        opt_source = None
+        opt_destination = None
+        opt_data_size = None
+        if isinstance(options, dict):
+            opt_source = options.get('source', None)
+            opt_destination = options.get('destination', None)
+            opt_data_size = options.get('data_size', None)
         
-        # Éviter que source == destination
-        while self.destination == self.source:
-            self.destination = random.randint(0, self.num_nodes - 1)
+        # Sélection de source et destination
+        if opt_source is not None and opt_destination is not None:
+            self.source = int(opt_source)
+            self.destination = int(opt_destination)
+        else:
+            # Si déjà définis par l'appelant et valides, on les conserve
+            if hasattr(self, 'source') and hasattr(self, 'destination') and 0 <= self.source < self.num_nodes and 0 <= self.destination < self.num_nodes and self.source != self.destination:
+                pass
+            else:
+                self.source = random.randint(0, self.num_nodes - 1)
+                self.destination = random.randint(0, self.num_nodes - 1)
+                while self.destination == self.source:
+                    self.destination = random.randint(0, self.num_nodes - 1)
         
-        # Taille de données aléatoire
-        self.data_size = random.randint(*self.data_size_range)
+        # Taille de données
+        if opt_data_size is not None:
+            self.data_size = int(opt_data_size)
+        else:
+            self.data_size = random.randint(*self.data_size_range)
         
         # Initialisation de l'état
         self.state = UWSNState(
