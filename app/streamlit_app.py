@@ -130,7 +130,7 @@ def create_network_visualization(nodes: List[Node], path: List[int] = None,
     ))
     
     # Mise en évidence du nœud source
-    if source is not None:
+    if source is not None and 0 <= source < len(nodes):
         fig.add_trace(go.Scatter3d(
             x=[nodes[source].x],
             y=[nodes[source].y],
@@ -146,7 +146,7 @@ def create_network_visualization(nodes: List[Node], path: List[int] = None,
         ))
     
     # Mise en évidence du nœud destination
-    if destination is not None:
+    if destination is not None and 0 <= destination < len(nodes):
         fig.add_trace(go.Scatter3d(
             x=[nodes[destination].x],
             y=[nodes[destination].y],
@@ -239,7 +239,7 @@ def create_2d_visualization(nodes: List[Node], path: List[int] = None,
     ))
     
     # Mise en évidence du nœud source
-    if source is not None:
+    if source is not None and 0 <= source < len(nodes):
         fig.add_trace(go.Scatter(
             x=[nodes[source].x],
             y=[nodes[source].y],
@@ -254,7 +254,7 @@ def create_2d_visualization(nodes: List[Node], path: List[int] = None,
         ))
     
     # Mise en évidence du nœud destination
-    if destination is not None:
+    if destination is not None and 0 <= destination < len(nodes):
         fig.add_trace(go.Scatter(
             x=[nodes[destination].x],
             y=[nodes[destination].y],
@@ -388,7 +388,6 @@ def main():
     # Paramètres de transmission
     st.sidebar.header("📡 Paramètres de Transmission")
     data_size = st.sidebar.slider("Taille des données (bits)", 100, 5000, 1000)
-    frequency = st.sidebar.slider("Fréquence acoustique (kHz)", 10, 50, 25)
     
     # Bouton pour générer un nouveau réseau
     if st.sidebar.button("🔄 Générer un nouveau réseau"):
@@ -405,7 +404,7 @@ def main():
             
             # Mise à jour des fréquences
             for node in nodes:
-                node.frequency = frequency
+                node.frequency = 25 # Fréquence fixe pour l'optimisation
             
             st.session_state.nodes = nodes
             st.session_state.network_generated = True
@@ -415,8 +414,12 @@ def main():
     # Sélection source et destination
     st.sidebar.header("🎯 Sélection du Chemin")
     node_ids = [node.id for node in nodes]
-    source = st.sidebar.selectbox("Nœud source", node_ids, index=0)
-    destination = st.sidebar.selectbox("Nœud destination", node_ids, index=min(1, len(node_ids)-1))
+    source_id = st.sidebar.selectbox("Nœud source", node_ids, index=0)
+    destination_id = st.sidebar.selectbox("Nœud destination", node_ids, index=min(1, len(node_ids)-1))
+    
+    # Convertir les IDs en indices
+    source = node_ids.index(source_id) if source_id in node_ids else 0
+    destination = node_ids.index(destination_id) if destination_id in node_ids else 1
     
     # Chargement du modèle
     st.sidebar.header("🤖 Modèle PPO")
